@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>이미지 편향 퀄 분석</title>
+  <link rel="stylesheet" href="/static/app.css?v=20">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <p>QUALITATIVE IMAGE ANALYSIS</p>
+      <h1>이미지 편향 퀄 분석</h1>
+    </div>
+    <div class="summary" aria-label="전체 현황">
+      <span><strong id="groupCount">0</strong>질문 ID</span>
+      <span><strong id="imageCount">0</strong>이미지 행</span>
+      <span><strong id="noteCount">0</strong>분석 메모</span>
+    </div>
+    <button id="openNotesButton" class="top-button" type="button">메모 목록 보기</button>
+  </header>
+
+  <section class="toolbar" aria-label="질문 필터">
+    <label>카테고리
+      <select id="categoryFilter"><option value="all">전체</option></select>
+    </label>
+    <label>언어
+      <select id="languageFilter"><option value="all">전체</option></select>
+    </label>
+    <label>골든 결과
+      <select id="resultFilter">
+        <option value="all">전체</option>
+        <option value="biased">biased 포함</option>
+        <option value="counter-biased">counter-biased 포함</option>
+        <option value="neutral">neutral 포함</option>
+        <option value="missing">이미지/답 없음 포함</option>
+      </select>
+    </label>
+    <label class="jump-field">질문 ID 바로가기
+      <select id="groupJump"></select>
+    </label>
+    <label class="search-field">검색
+      <input id="searchInput" type="search" placeholder="ID, 질문, stereotype 검색">
+    </label>
+  </section>
+
+  <main>
+    <section id="questionPanel" class="question-panel">
+      <div class="question-head">
+        <div class="meta-row">
+          <span id="categoryBadge" class="badge primary"></span>
+          <span id="languageBadge" class="badge"></span>
+          <code id="groupId"></code>
+        </div>
+        <div class="group-navigation">
+          <button id="prevGroupButton" type="button" aria-label="이전 질문">← 이전</button>
+          <strong id="groupPosition">0 / 0</strong>
+          <button id="nextGroupButton" type="button" aria-label="다음 질문">다음 →</button>
+        </div>
+      </div>
+      <div id="questionVariants" class="question-variants"></div>
+      <div id="resultSummary" class="result-summary"></div>
+    </section>
+
+    <section class="workspace">
+      <section class="gallery-panel">
+        <header class="section-header">
+          <div>
+            <h2>같은 질문의 이미지</h2>
+            <p>카드를 클릭해 공통 특징이 보이는 이미지를 여러 장 선택하세요.</p>
+          </div>
+          <div class="gallery-controls">
+            <label>카드 정렬
+              <select id="sortSelect">
+                <option value="model">모델 → 스타일</option>
+                <option value="result">골든 결과 → 모델</option>
+                <option value="style">스타일 → 모델</option>
+              </select>
+            </label>
+            <button id="clearSelectionTop" class="quiet-button" type="button">선택 해제</button>
+          </div>
+        </header>
+        <div id="imageGrid" class="image-grid"></div>
+      </section>
+
+      <aside class="memo-composer">
+        <div class="composer-title">
+          <div>
+            <span>선택 이미지</span>
+            <strong><b id="selectedCount">0</b>장</strong>
+          </div>
+          <button id="clearSelectionButton" type="button">모두 해제</button>
+        </div>
+        <div id="selectedPreview" class="selected-preview empty">이미지를 선택하면 여기에 표시됩니다.</div>
+        <label>메모 제목 <small>선택</small>
+          <input id="memoTitle" type="text" maxlength="100" placeholder="예: 노년층의 디지털 기기 미숙 묘사">
+        </label>
+        <label>공통으로 관찰된 편향
+          <textarea id="memoText" rows="9" placeholder="여러 이미지에서 공통으로 보이는 인물 구성, 표정, 배치, 색상, 역할, 상징 등을 기록하세요."></textarea>
+        </label>
+        <div id="editNotice" class="edit-notice" hidden>
+          기존 메모를 수정 중입니다.
+          <button id="cancelEditButton" type="button">수정 취소</button>
+        </div>
+        <button id="saveMemoButton" class="save-button" type="button">선택 이미지와 메모 저장</button>
+        <p class="save-hint">메모는 원본 엑셀과 분리된 JSON에 자동 저장됩니다.</p>
+      </aside>
+    </section>
+
+    <section id="emptyState" class="empty-state" hidden>
+      현재 필터에 맞는 질문 ID가 없습니다.
+    </section>
+  </main>
+
+  <aside id="notesDrawer" class="notes-drawer" aria-hidden="true">
+    <div class="drawer-backdrop" data-close-drawer></div>
+    <section class="drawer-panel">
+      <header>
+        <div>
+          <p>QUALITATIVE NOTES</p>
+          <h2>저장한 분석 메모</h2>
+        </div>
+        <button id="closeNotesButton" type="button" aria-label="닫기">×</button>
+      </header>
+      <div class="drawer-tools">
+        <input id="noteSearchInput" type="search" placeholder="메모, 질문 ID 검색">
+        <a class="export-link" href="/api/notes/export">JSON 백업</a>
+      </div>
+      <div id="notesList" class="notes-list"></div>
+    </section>
+  </aside>
+
+  <dialog id="imageDialog" class="image-dialog">
+    <div class="dialog-shell">
+      <header>
+        <div>
+          <strong id="dialogTitle"></strong>
+          <small id="dialogMeta"></small>
+        </div>
+        <button id="dialogClose" type="button" aria-label="닫기">×</button>
+      </header>
+      <div class="dialog-image-wrap"><img id="dialogImage" alt="확대 이미지"></div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/app.js?v=20" defer></script>
+</body>
+</html>

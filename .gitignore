@@ -1,0 +1,15 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Private research data: never commit these paths.
+final_agreement.xlsx
+images/
+
+# Researcher-specific analysis notes.
+qual_analysis_notes.json
+qual_analysis_notes.json.tmp
+
+*.log
